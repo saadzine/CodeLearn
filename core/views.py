@@ -7,6 +7,35 @@ from .models import Cour, Quiz, Question, Choix
 from django.contrib.auth.decorators import user_passes_test
 from rest_framework import viewsets
 from .serializers import *
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User
+from core.models import Profile
+
+
+class SignupView(APIView):
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        email = request.data.get("email")
+        role = request.data.get("role")
+
+        if role not in ['student', 'teacher']:
+            return Response({"error": "Rôle invalide"}, status=400)
+
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "Nom d'utilisateur déjà utilisé"}, status=400)
+
+        user = User.objects.create_user(username=username, password=password, email=email)
+        
+        # vérifier si le profil existe déjà
+        if not Profile.objects.filter(user=user).exists():
+            Profile.objects.create(user=user, role=role)
+
+        return Response({"message": "Utilisateur créé avec succès"}, status=201)
+
+
 
 def est_enseignant(user):
     return hasattr(user, 'profile') and user.profile.role == 'teacher'
@@ -74,4 +103,21 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsTeacher, IsStudent
+
+
+class OnlyForTeachers(APIView):
+    permission_classes = [IsAuthenticated, IsTeacher]
+
+    def get(self, request):
+        return Response({"message": "Bienvenue, enseignant !"})
+
+
+class OnlyForStudents(APIView):
+    permission_classes = [IsAuthenticated, IsStudent]
+
+    def get(self, request):
+        return Response({"message": "Bienvenue, étudiant !"})
 
