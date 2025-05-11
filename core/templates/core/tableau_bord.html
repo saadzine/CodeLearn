@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Tableau de bord</title>
+</head>
+<body>
+<h1>Bienvenue, {{ profil.user.username }} !</h1>
+<p>Vous êtes connecté en tant que <strong>{{ profil.get_role_display }}</strong></p>
+
+{% if profil.role == 'teacher' %}
+    <a href="{% url 'espace_enseignant' %}">Gérer mes cours et quiz</a>
+{% endif %}
+
+<a href="{% url 'deconnexion' %}">Se déconnecter</a>
+</html>

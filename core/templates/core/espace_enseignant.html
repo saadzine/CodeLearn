@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Espace Enseignant</title>
+</head>
+<body>
+    <h1>Bienvenue {{ request.user.username }} (Enseignant)</h1>
+
+    <h2>Ajouter un cours</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="titre_cours" placeholder="Titre du cours" required>
+        <textarea name="description" placeholder="Description du cours" required></textarea>
+        <button type="submit">Ajouter le cours</button>
+    </form>
+
+    <h2>Ajouter un quiz</h2>
+    <form method="post">
+        {% csrf_token %}
+        <select name="cours_id">
+            {% for c in cours %}
+                <option value="{{ c.id }}">{{ c.titre }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="titre_quiz" placeholder="Titre du quiz" required>
+        <button type="submit">Ajouter le quiz</button>
+    </form>
+
+    <a href="{% url 'tableau_bord' %}">Retour au tableau de bord</a>
+</body>
+</html>
